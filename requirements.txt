@@ -3,6 +3,6 @@ torchvision
 numpy
 opencv-python
 tqdm
-einops
+einops==0.6.1
 PyYAML
 matplotlib

@@ -33,9 +33,13 @@ def train_for_one_epoch(epoch_idx, model, mnist_loader, optimizer, crtierion, co
             cv2.imwrite('{}/input.jpeg'.format(config['train_params']['task_name']), im_input)
             cv2.imwrite('{}/output.jpeg'.format(config['train_params']['task_name']), im_output)
         
+        # print(output)
+        
         loss = (crtierion(output, im) + config['train_params']['kl_weight']*kl)/(1+config['train_params']['kl_weight'])
+        # print(loss.item())
         losses.append(loss.item())
         loss.backward()
+        torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
         optimizer.step()
         count += 1
         
@@ -85,8 +89,11 @@ def train(args):
     mnist_loader = DataLoader(mnist, batch_size=config['train_params']['batch_size'],
                               shuffle=True, num_workers=4)
     
+    
+    print(model.parameters())
+    
     optimizer = Adam(model.parameters(), lr=config['train_params']['lr'])
-    scheduler = ReduceLROnPlateau(optimizer, factor=0.5, patience=1, verbose=True)
+    scheduler = ReduceLROnPlateau(optimizer, factor=0.5, patience=1)
     criterion = {
         'l1': torch.nn.SmoothL1Loss(beta=0.1),
         'l2': torch.nn.MSELoss()
@@ -99,6 +106,7 @@ def train(args):
     
     best_loss = np.inf
     for epoch_idx in range(num_epochs):
+        torch.autograd.set_detect_anomaly(True)
         mean_loss = train_for_one_epoch(epoch_idx, model, mnist_loader, optimizer, criterion, config)
         scheduler.step(mean_loss)
         # Simply update checkpoint if found better version

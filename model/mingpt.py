@@ -35,7 +35,7 @@ class CasualSelfAttention(nn.Module):
         
         self.proj = nn.Linear(config.n_embd, config.n_embd)
         
-        self.register_buffer("mask", torch.tril(torch.ones(config.block_size, config.block_size)).view(1, 1, config.block_size, config.block_size))
+        self.register_buffer("mask", torch.tril(torch.ones(config.block_size, config.block_size)).(1, 1, config.block_size, config.block_size))
         
         self.n_head = config.n_head
         
@@ -43,9 +43,9 @@ class CasualSelfAttention(nn.Module):
     def forward(self, x, layer_past = None):
         B, T, C = x.size()
         
-        k = self.key(x).view(B, T, self.n_head, C // self.n_head).transpose(1, 2)
-        q = self.query(x).view(B, T, self.n_head, C // self.n_head).transpose(1, 2)
-        v = self.value(x).view(B, T, self.n_head, C // self.n_head).transpose(1, 2)
+        k = self.key(x).reshape(B, T, self.n_head, C // self.n_head).transpose(1, 2)
+        q = self.query(x).reshape(B, T, self.n_head, C // self.n_head).transpose(1, 2)
+        v = self.value(x).reshape(B, T, self.n_head, C // self.n_head).transpose(1, 2)
         
         att = (q @ k.transpose(-2, -1)) * (1.0 / math.sqrt(k.size(-1)))
         att = att.masked_fill(self.mask[:, :, :T, :T] == 0, float('-inf'))
@@ -54,7 +54,7 @@ class CasualSelfAttention(nn.Module):
         att = self.attn_drop(att)
         
         y = att @ v
-        y = y.transpose(1, 2).contiguous().view(B, T, C)
+        y = y.transpose(1, 2).contiguous().reshape(B, T, C)
         
         y = self.resid_drop(self.proj(y))
         return y

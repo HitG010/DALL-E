@@ -6,12 +6,10 @@ from einops import einsum, rearrange
 class Quantizer(nn.Module):
     def __init__(self, num_embeddings, embedding_dim):
         super(Quantizer, self).__init__()
+        
         self.num_embeddings = num_embeddings
-        self.embedding_dim = embedding_dim
-        
-        self.embedding = nn.Embedding(num_embeddings, embedding_dim)
-        
-        
+        self.embedding = nn.Embedding(self.num_embeddings, embedding_dim)
+    
     def forward(self, x):
         B, C, H, W = x.shape
         one_hot = torch.nn.functional.gumbel_softmax(x, tau=0.9, dim=1, hard=False)
