@@ -50,16 +50,13 @@ def train_for_one_epoch(epoch_idx, model, mnist_loader, optimizer, crtierion, co
 
 
 def train(args):
-    ######## Read the config file #######
     with open(args.config_path, 'r') as file:
         try:
             config = yaml.safe_load(file)
         except yaml.YAMLError as exc:
             print(exc)
     print(config)
-    #######################################
     
-    ######## Set the desired seed value #######
     seed = config['train_params']['seed']
     torch.manual_seed(seed)
     np.random.seed(seed)
@@ -71,8 +68,6 @@ def train(args):
         os.mkdir(config['train_params']['task_name'])
     
     
-    #######################################
-    # Create the model and dataset
     num_epochs = config['train_params']['num_epochs']
     model = DiscreteVAE(
         num_embeddings=config['model_params']['vae_num_embeddings'],

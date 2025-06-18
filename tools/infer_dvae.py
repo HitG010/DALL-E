@@ -9,16 +9,10 @@ from dataset.mnist_color_texture_dataset import MnistVisualLanguageDataset
 from torchvision.utils import make_grid
 from einops import rearrange
 
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+device = 'mps'
 
 
 def inference(args):
-    r"""
-    Method to infer discrete vae and get
-    reconstructions
-    :param args:
-    :return:
-    """
     with open(args.config_path, 'r') as file:
         try:
             config = yaml.safe_load(file)
